@@ -8,9 +8,9 @@ import essentialmonolith.model.WorkLog;
 import essentialmonolith.repository.WorkLogRepository;
 
 @Service
-public class WorkLogService {
+public class PlanningService {
 	private final WorkLogRepository workLogRepository;
-	public WorkLogService(WorkLogRepository workLogRepository) {
+	public PlanningService(WorkLogRepository workLogRepository) {
 		super();
 		this.workLogRepository = workLogRepository;
 	}

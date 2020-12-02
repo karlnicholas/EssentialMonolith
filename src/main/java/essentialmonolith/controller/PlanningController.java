@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import essentialmonolith.model.WorkLog;
-import essentialmonolith.service.WorkLogService;
+import essentialmonolith.service.PlanningService;
 
 @RestController
-@RequestMapping("worklog")
-public class WorkLogController {
-	private final WorkLogService  workLogService;
-	public WorkLogController(WorkLogService workLogService) {
+@RequestMapping("planning")
+public class PlanningController {
+	private final PlanningService  workLogService;
+	public PlanningController(PlanningService workLogService) {
 		this.workLogService = workLogService;
 	}
 	@GetMapping
