@@ -3,3 +3,16 @@ create table department (id bigint not null auto_increment primary key, name var
 create table client (id bigint not null auto_increment primary key, name varchar(255));
 create table project (id bigint not null auto_increment primary key, name varchar(255), client_id bigint);
 create table work_log (id bigint not null auto_increment primary key, entry_date date, hours int, rate numeric(18,2), project_id bigint, employee_id bigint);
+alter table employee add constraint employee_department_fk foreign key (department_id) references department(id);
+alter table project add constraint project_client_fk foreign key (client_id) references client(id);
+alter table work_log add constraint work_log_project_fk foreign key (project_id) references project(id);
+alter table work_log add constraint work_log_employee_fk foreign key (employee_id) references employee(id);
+create table week_dimension(id bigint not null auto_increment primary key, name varchar(255));
+create table hours_range_dimension(id bigint not null auto_increment primary key, name varchar(255));
+create table rate_range_dimension(id bigint not null auto_increment primary key, name varchar(255));
+create table billing_fact(id bigint not null auto_increment primary key, amount numeric(18,2), project_id bigint, employee_id bigint, week_dimension_id bigint, hours_range_dimension_id bigint, rate_range_dimension_id bigint);
+alter table billing_fact add constraint billing_fact_project_fk foreign key (project_id) references project(id);
+alter table billing_fact add constraint billing_fact_employee_fk foreign key (employee_id) references employee(id);
+alter table billing_fact add constraint billing_fact_week_dimension_fk foreign key (week_dimension_id) references week_dimension(id);
+alter table billing_fact add constraint billing_fact_hours_range_dimension_fk foreign key (hours_range_dimension_id) references hours_range_dimension(id);
+alter table billing_fact add constraint billing_fact_rate_range_dimension_fk foreign key (rate_range_dimension_id) references rate_range_dimension(id);
