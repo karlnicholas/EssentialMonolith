@@ -10,7 +10,8 @@ alter table work_log add constraint work_log_employee_fk foreign key (employee_i
 create table week_dimension(id bigint not null auto_increment primary key, name varchar(255));
 create table hours_range_dimension(id bigint not null auto_increment primary key, name varchar(255));
 create table rate_range_dimension(id bigint not null auto_increment primary key, name varchar(255));
-create table billing_fact(id bigint not null auto_increment primary key, amount numeric(18,2), project_id bigint, employee_id bigint, week_dimension_id bigint, hours_range_dimension_id bigint, rate_range_dimension_id bigint);
+create table billing_fact(amount numeric(18,2), project_id bigint, employee_id bigint, week_dimension_id bigint, hours_range_dimension_id bigint, rate_range_dimension_id bigint, primary key(project_id, employee_id, week_dimension_id, hours_range_dimension_id, rate_range_dimension_id));
+create table analysis_run (id bigint not null primary key, last_run_time datetime, populating boolean);
 alter table billing_fact add constraint billing_fact_project_fk foreign key (project_id) references project(id);
 alter table billing_fact add constraint billing_fact_employee_fk foreign key (employee_id) references employee(id);
 alter table billing_fact add constraint billing_fact_week_dimension_fk foreign key (week_dimension_id) references week_dimension(id);

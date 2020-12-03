@@ -2,16 +2,17 @@ package essentialmonolith.model;
 
 import javax.persistence.*;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
-public class Employee {
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-	private String name;
+@EqualsAndHashCode(callSuper=true)
+public class Employee extends Dimension {
 	@ManyToOne
 	private Department department;
 }

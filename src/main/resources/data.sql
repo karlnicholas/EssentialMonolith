@@ -1,3 +1,4 @@
+insert into analysis_run(id, last_run_time, populating) values(1, '2020-11-01T00:00:00Z', false);
 insert into department(name) values ('appdev');
 insert into department(name) values ('devops');
 insert into employee(name, department_id) values ('employee 1', 1);

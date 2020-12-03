@@ -1,6 +1,6 @@
 package essentialmonolith.model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
 
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -8,5 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-public class Client extends Dimension {
+public class HoursRangeDimension extends Dimension {
+
 }
