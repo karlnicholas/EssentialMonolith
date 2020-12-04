@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -106,7 +107,7 @@ public class AnalysisService {
 	 * Map, reduce for analysis tables
 	 */
 	@Async
-	public void populate() {
+	public CompletableFuture<Void> populate() {
 		try {
 			billingFactRepository.deleteAll();
 			weekDimensionRepository.deleteAll();
@@ -160,7 +161,6 @@ public class AnalysisService {
 				)
 			).values().stream().map(Optional::get)
 			.forEach(billingFactRepository::save);
-
 		} catch ( Exception e) {
 			log.error(e.getMessage());
 		} finally {
@@ -169,6 +169,7 @@ public class AnalysisService {
 			analysisRun.setPopulating(Boolean.FALSE);
 			analysisRunRepository.save(analysisRun);
 		}
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public SummaryStatistics getBillingQueryResult(
