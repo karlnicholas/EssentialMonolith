@@ -2,9 +2,9 @@ package essentialmonolith.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -109,12 +109,10 @@ public class AnalysisServiceTests {
 		doReturn(Collections.singletonList(billingFact))
 			.when(billingFactRepository)
 			.findAll(Mockito.<Example<BillingFact>>any());
-
-		when(billingFactRepository.save(Mockito.any(BillingFact.class)))
-        .thenAnswer(i -> {
-			billingFactAC = i.getArgument(0, BillingFact.class); 
-        	return billingFactAC;
-        });
+		doAnswer(i->{
+				billingFactAC = i.getArgument(0); 
+	        	return billingFactAC;
+		}).when(billingFactRepository).save(Mockito.any());
 	}
 
 	@Test
