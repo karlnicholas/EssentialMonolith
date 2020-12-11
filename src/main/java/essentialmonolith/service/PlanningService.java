@@ -11,7 +11,6 @@ import essentialmonolith.repository.WorkLogRepository;
 public class PlanningService {
 	private final WorkLogRepository workLogRepository;
 	public PlanningService(WorkLogRepository workLogRepository) {
-		super();
 		this.workLogRepository = workLogRepository;
 	}
 
