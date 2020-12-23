@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -16,6 +17,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import essentialmonolith.dto.AnalysisDimension;
+import essentialmonolith.dto.AnalysisView;
+import essentialmonolith.model.AnalysisRun;
 import essentialmonolith.model.Dimension;
 import essentialmonolith.service.AnalysisService;
 
@@ -30,30 +33,29 @@ public class AnalysisControllerTests {
 	@MockBean
 	private AnalysisService analysisService;
 	
-	@Test
-	public void getCountTest() throws Exception {
-		doReturn(1L).when(analysisService).getFactCount();
-
-		mockMvc.perform(get("/analysis/count")).andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(content().string(containsString("1")));
-	}
+	private final String analysisResponse = "{\"analysisDimensions\":[{\"name\":\"AD\",\"dimensions\":[{\"id\":0,\"name\":\"D\"}]}],\"analysisRun\":{\"id\":1,\"lastRunTime\":\"2020-01-01T00:00:00\",\"populating\":false},\"factCount\":1}\r\n";
+	
 	@Test
 	public void getBillingDimensions() throws Exception {
-		AnalysisDimension analysisDimension = AnalysisDimension.builder().name("AD").dimensions(Collections.singletonList(Dimension.builder().id(0L).name("D").build())).build();
-		doReturn(Collections.singletonList(analysisDimension)).when(analysisService).getBillingDimensions();
+		AnalysisView analysisView = AnalysisView.builder()
+				.factCount(1L)
+				.analysisDimensions(
+						Collections.singletonList(AnalysisDimension.builder().name("AD").dimensions(Collections.singletonList(Dimension.builder().id(0L).name("D").build())).build()))
+				.analysisRun(AnalysisRun.builder().id(1L).lastRunTime(LocalDateTime.of(2020, 1, 1, 0, 0, 0)).populating(false).build())
+				.build();
+		doReturn(analysisView).when(analysisService).getAnalysisView();
 
-		mockMvc.perform(get("/analysis/billingdimensions")).andDo(print())
+		mockMvc.perform(get("/api/analysis")).andDo(print())
 		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("AD")));
+		.andExpect(content().json(analysisResponse));
 	}
 	@Test
-	public void getPurchaseResult() throws Exception {
+	public void getQueryResult() throws Exception {
 		SummaryStatistics summaryStatistics = new SummaryStatistics();
 		summaryStatistics.addValue(10.0);
 		doReturn(summaryStatistics).when(analysisService).getBillingQueryResult(null, null, null, null, null);
 
-		mockMvc.perform(get("/analysis/billingresult")).andDo(print())
+		mockMvc.perform(get("/api/analysis/billingresult")).andDo(print())
 		.andExpect(status().isOk())
 		.andExpect(content().string(containsString("10.0")));
 	}
@@ -61,7 +63,7 @@ public class AnalysisControllerTests {
 	public void getStartPopulate() throws Exception {
 		doReturn(Boolean.TRUE).when(analysisService).startPopulate();
 
-		mockMvc.perform(get("/analysis/populate")).andDo(print())
+		mockMvc.perform(get("/api/analysis/populate")).andDo(print())
 		.andExpect(status().isOk());
 	}
 }

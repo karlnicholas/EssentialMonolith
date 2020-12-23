@@ -11,7 +11,7 @@ import essentialmonolith.model.Employee;
 import essentialmonolith.service.HumanResourcesService;
 
 @RestController
-@RequestMapping("hr")
+@RequestMapping("api/hr")
 public class HumanResourcesController {
 	private final HumanResourcesService  humanResourcesService;
 	public HumanResourcesController(HumanResourcesService humanResourcesService) {

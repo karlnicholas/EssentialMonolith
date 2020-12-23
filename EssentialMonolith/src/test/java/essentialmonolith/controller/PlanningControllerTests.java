@@ -44,7 +44,7 @@ public class PlanningControllerTests {
 				.build()))
 		.when(planningService).getWorkLogs();
 
-		mockMvc.perform(get("/planning")).andDo(print())
+		mockMvc.perform(get("/api/planning")).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("E")));
 	}

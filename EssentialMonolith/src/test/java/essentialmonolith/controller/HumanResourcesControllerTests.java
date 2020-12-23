@@ -36,7 +36,7 @@ public class HumanResourcesControllerTests {
 						.build()).build()))
 		.when(humanResourcesService).getEmployees();
 
-		mockMvc.perform(get("/hr")).andDo(print())
+		mockMvc.perform(get("/api/hr")).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("E")));
 	}

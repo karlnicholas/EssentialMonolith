@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import essentialmonolith.dto.AnalysisDimension;
+import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.model.AnalysisRun;
 import essentialmonolith.model.BillingFact;
 import essentialmonolith.model.BillingFact.BillingFactBuilder;
@@ -67,26 +68,6 @@ public class AnalysisService {
 		this.weekDimensionRepository = weekDimensionRepository; 
 		this.hoursRangeDimensionRepository = hoursRangeDimensionRepository; 
 		this.rateRangeDimensionRepository = rateRangeDimensionRepository; 
-	}
-
-	public AnalysisRun getAnalysisRun() {
-		AnalysisRun analysisRun = analysisRunRepository.findById(1L).get();
-		return analysisRun;
-	}
-	
-	public List<AnalysisDimension> getBillingDimensions() {
-		List<AnalysisDimension> dimensions = new ArrayList<>();
-		dimensions.add(AnalysisDimension.builder().name("Project")
-				.dimensions(projectRepository.findAll().stream().collect(Collectors.toList())).build());
-		dimensions.add(AnalysisDimension.builder().name("Employee")
-				.dimensions(employeeRepository.findAll().stream().collect(Collectors.toList())).build());
-		dimensions.add(AnalysisDimension.builder().name("Week")
-				.dimensions(weekDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
-		dimensions.add(AnalysisDimension.builder().name("HoursRange")
-				.dimensions(hoursRangeDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
-		dimensions.add(AnalysisDimension.builder().name("RateRange")
-				.dimensions(rateRangeDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
-		return dimensions;
 	}
 
 	private String getWeek(LocalDate entryDate) {
@@ -190,9 +171,29 @@ public class AnalysisService {
 		return true;
 	}
 	
-	public Long getFactCount() {
-		return billingFactRepository.count();
+	public AnalysisView getAnalysisView() {
+		return AnalysisView.builder()
+			.analysisRun(analysisRunRepository.findById(1L).get())
+			.analysisDimensions(getBillingDimensions())
+			.factCount(billingFactRepository.count())
+			.build();
 	}
+	
+	private List<AnalysisDimension> getBillingDimensions() {
+		List<AnalysisDimension> dimensions = new ArrayList<>();
+		dimensions.add(AnalysisDimension.builder().name("Project")
+				.dimensions(projectRepository.findAll().stream().collect(Collectors.toList())).build());
+		dimensions.add(AnalysisDimension.builder().name("Employee")
+				.dimensions(employeeRepository.findAll().stream().collect(Collectors.toList())).build());
+		dimensions.add(AnalysisDimension.builder().name("Week")
+				.dimensions(weekDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
+		dimensions.add(AnalysisDimension.builder().name("HoursRange")
+				.dimensions(hoursRangeDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
+		dimensions.add(AnalysisDimension.builder().name("RateRange")
+				.dimensions(rateRangeDimensionRepository.findAll().stream().collect(Collectors.toList())).build());
+		return dimensions;
+	}
+
 
 
 }

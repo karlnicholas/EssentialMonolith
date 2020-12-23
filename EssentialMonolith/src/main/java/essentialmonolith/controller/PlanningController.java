@@ -11,7 +11,7 @@ import essentialmonolith.model.WorkLog;
 import essentialmonolith.service.PlanningService;
 
 @RestController
-@RequestMapping("planning")
+@RequestMapping("api/planning")
 public class PlanningController {
 	private final PlanningService  workLogService;
 	public PlanningController(PlanningService workLogService) {

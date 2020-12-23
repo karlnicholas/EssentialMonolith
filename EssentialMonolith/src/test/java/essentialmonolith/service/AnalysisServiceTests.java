@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 
-import essentialmonolith.dto.AnalysisDimension;
+import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.model.AnalysisRun;
 import essentialmonolith.model.BillingFact;
 import essentialmonolith.model.BillingFactId;
@@ -116,9 +116,12 @@ public class AnalysisServiceTests {
 	}
 
 	@Test
-	public void getAnalysisRun() {
-		AnalysisRun analysisRunResponse = analysisService.getAnalysisRun();
-		assertEquals(analysisRun, analysisRunResponse);
+	public void getAnalysisView() {
+		AnalysisView analysisViewResponse = analysisService.getAnalysisView();
+		assertEquals(analysisRun, analysisViewResponse.getAnalysisRun());
+		assertEquals(5, analysisViewResponse.getAnalysisDimensions().size());
+		Long count = analysisViewResponse.getFactCount();
+		assertEquals(1, count);
 	}
 
 	/**
@@ -144,22 +147,10 @@ public class AnalysisServiceTests {
 	}
 
 	@Test
-	public void getBillingDimensions() {
-		List<AnalysisDimension> dimensions = analysisService.getBillingDimensions();
-		assertEquals(5, dimensions.size());
-	}
-
-	@Test
 	public void getPurchaseResult() {
 		SummaryStatistics summaryStatistics = analysisService.getBillingQueryResult(null, null, null, null, null);
 		assertEquals(3200.0, summaryStatistics.getMean());
 		assertEquals(1, summaryStatistics.getN());
-	}
-
-	@Test
-	public void getFactCount() {
-		Long count = analysisService.getFactCount();
-		assertEquals(1, count);
 	}
 
 }
