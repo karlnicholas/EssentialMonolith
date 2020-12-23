@@ -1,5 +1,5 @@
 import React from "react";
-import axios from 'axios';
+import http from "./http-common";
 import Container from "react-bootstrap/Container";
 import BootstrapTable from "react-bootstrap-table-next";
 
@@ -18,7 +18,7 @@ export default class Planning extends React.Component {
     ]
   }
   componentDidMount() {
-    axios.get('http://localhost:8080/planning').then(response => {
+    http.get('/planning').then(response => {
       this.setState({
         worklogs: response.data
       });

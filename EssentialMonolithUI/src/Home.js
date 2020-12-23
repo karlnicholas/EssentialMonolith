@@ -1,5 +1,5 @@
 import React from "react";
-import axios from 'axios';
+import http from "./http-common";
 import Container from "react-bootstrap/Container";
 import BootstrapTable from "react-bootstrap-table-next";
 
@@ -13,7 +13,7 @@ export default class Home extends React.Component {
     ]
   }
   componentDidMount() {
-    axios.get('http://localhost:8080/hr').then(response => {
+    http.get('/hr').then(response => {
       this.setState({
         employees: response.data
       });

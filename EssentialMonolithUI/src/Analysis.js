@@ -1,72 +1,69 @@
 import React from 'react';
-import axios from 'axios';
+import http from "./http-common";
 import Container from "react-bootstrap/Container";
-import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import Table from "react-bootstrap/Table";
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 function handlePopulateClick() {
-  axios.get('http://localhost:8080/analysis/populate');
+  http.get('/analysis/populate');
   window.location.reload();
 }
 
 export default class Analysis extends React.Component {
   constructor(props) {
     super(props);
-    this.onTargetSelect = this.onTargetSelect.bind(this);
-    this.onClick = this.onClick.bind(this);
     this.state = {
-      lastRun: '',
+      analysisRun: '',
       lastRunDateTime: '',
       count: 0,
-      dimensions: [], 
-      dropdownTitles: [], 
+      dimensions: [],
+      dropdownTitles: [],
+      dropdownIds: [],
       queryStats: null
     }
+    this.onTargetSelect = this.onTargetSelect.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
-  tableHeaders = null;
-  tableBody = null;
-  tableBody2 = null;
   componentDidMount() {
-    const requestOne = axios.get('http://localhost:8080/analysis');
-    const requestTwo = axios.get('http://localhost:8080/analysis/count');
-    const requestThree = axios.get('http://localhost:8080/analysis/billingdimensions');
-    axios.all([requestOne, requestTwo, requestThree]).then(axios.spread((...responses) => {
-      let a = this.state.dropdownTitles.slice(); //creates the clone of the state
-      a = new Array(responses[2].data.length).fill("");
+    http.get('/analysis').then(response => {
+      let titles = this.state.dropdownTitles.slice(); //creates the clone of the state
+      titles = new Array(response.data.analysisDimensions.length).fill("");
+      let ids = this.state.dropdownIds.slice(); //creates the clone of the state
+      ids = new Array(response.data.analysisDimensions.length).fill(null);
       this.setState({
-        lastRun: responses[0].data,
-        lastRunDateTime: new Date(responses[0].data.lastRunTime),
-        count: responses[1].data,
-        dimensions: responses[2].data, 
-        dropdownTitles: a
+        analysisRun: response.data.analysisRun,
+        lastRunDateTime: new Date(response.data.analysisRun.lastRunTime),
+        count: response.data.factCount,
+        dimensions: response.data.analysisDimensions,
+        dropdownTitles: titles, 
+        dropdownIds: ids
       });
       // use/access the results 
-    })).catch(errors => {
+    }).catch(errors => {
       // react on errors.
     })
   }
-  onTargetSelect(target, index) {
-    console.log(target);
-    let a = this.state.dropdownTitles.slice(); //creates the clone of the state
-    a[index] = target;
-    this.setState({dropdownTitles: a});
+  onTargetSelect(name, id, index) {
+    let titles = this.state.dropdownTitles.slice(); //creates the clone of the state
+    titles[index] = name;
+    let ids = this.state.dropdownIds.slice(); //creates the clone of the state
+    ids[index] = id;
+    this.setState({ dropdownTitles: titles, dropdownIds: ids });
   }
   onClick() {
-    console.log("CLICK");
     var queryString = '';
     var queryMark = '?';
     var i;
-    for ( i = 0; i < this.state.dropdownTitles.length; ++i ) {
-      var select = this.state.dropdownTitles[i];
-      if ( select !==  "" ) {
+    for (i = 0; i < this.state.dropdownTitles.length; ++i) {
+      var select = this.state.dropdownIds[i];
+      if (select !== null) {
         queryString += queryMark + this.state.dimensions[i].name + '=' + select;
         queryMark = '&';
       }
     }
-    axios.get('http://localhost:8080/analysis/billingresult'+queryString).then(response => {
+    http.get('/analysis/billingresult' + queryString).then(response => {
       this.setState({
         queryStats: response.data
       });
@@ -74,59 +71,59 @@ export default class Analysis extends React.Component {
     })
   }
   render() {
-    if (this.state.dimensions.length > 0) {
-      console.log(this.state.dropdownTitles);
-      this.tableHeaders = this.state.dimensions.map(dimension => <th key={dimension.name}>{dimension.name}</th>);
-      this.tableBody = this.state.dimensions.map(dlist => <td key={dlist.name}><select id={dlist.name}><option value=""></option>
-      {dlist.dimensions.map(dvalue => <option key={dvalue.id} value={dvalue.id}>{dvalue.name}</option>)}
-      </select></td>);
-      this.tableBody2 = this.state.dimensions.map((dlist, index) => 
-        <td key={dlist.name}>
-          <DropdownButton id={dlist.name} title={this.state.dropdownTitles[index]}><DropdownItem value="" onSelect={() => this.onTargetSelect("", index)}>&nbsp;</DropdownItem>
-          {dlist.dimensions.map(dvalue => 
-            <DropdownItem key={dvalue.id} value={dvalue.id} onSelect={() => this.onTargetSelect(dvalue.name, index)}>
-              {dvalue.name}
-            </DropdownItem>)}
-          </DropdownButton>
-        </td>);
-    } else {
-      console.log("Skip");
-    }
-    let {queryStats} = this.state;
-    const queryResultDisplay = () => {
-      if ( queryStats != null ) {
+    const tableHeaders = () => {
+      if (this.state.dimensions.length > 0) {
         return (
-          <Card>
-          <Card.Body>
-            <Card.Title>Amount</Card.Title><Card.Text>{queryStats.n * queryStats.mean}</Card.Text>
-            <Card.Title>N</Card.Title><Card.Text>{queryStats.n}</Card.Text>
-            <Card.Title>Mean</Card.Title><Card.Text>{queryStats.mean}</Card.Text>
-            <Card.Title>Min</Card.Title><Card.Text>{queryStats.min}</Card.Text>
-            <Card.Title>Max</Card.Title><Card.Text>{queryStats.max}</Card.Text>
-          </Card.Body>
-          </Card>
+          this.state.dimensions.map(dimension => <th key={dimension.name}>{dimension.name}</th>)
+          );
+      }
+    }
+    const tableBody = () => {
+      if (this.state.dimensions.length > 0) {
+        return (this.state.dimensions.map((dlist, index) =>
+          <td key={dlist.name}>
+            <DropdownButton id={dlist.name} title={this.state.dropdownTitles[index]}><DropdownItem value="" onSelect={() => this.onTargetSelect("", null, index)}>&nbsp;</DropdownItem>
+              {dlist.dimensions.map(dvalue =>
+                <DropdownItem key={dvalue.id} value={dvalue.id} onSelect={() => this.onTargetSelect(dvalue.name, dvalue.id, index)}>
+                  {dvalue.name}
+                </DropdownItem>)}
+            </DropdownButton>
+          </td>));
+      }
+    }
+    let { queryStats } = this.state;
+    const queryResultDisplay = () => {
+      if (queryStats != null) {
+        return (
+          <Table>
+            <thead>
+              <tr><th>Amount</th><th>Mean</th><th>Min</th><th>Max</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>{queryStats.sum.toLocaleString()}</td><td>{queryStats.mean.toLocaleString()}</td><td>{queryStats.min.toLocaleString()}</td><td>{queryStats.max.toLocaleString()}</td></tr>
+            </tbody>
+          </Table>
         );
       }
     }
     return (
       <Container>
-        <Card>
-          <Card.Body>
-            <Card.Title>Current Count</Card.Title><Card.Text>{this.state.count}</Card.Text>
-            <Card.Title>Last Run Time</Card.Title><Card.Text>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(this.state.lastRunDateTime)}</Card.Text>
-            <Card.Title>Populating</Card.Title><Card.Text>{String(this.state.lastRun.populating)}</Card.Text>
-            <Button onClick={handlePopulateClick}>Populate</Button>
-          </Card.Body>
-        </Card>
         <Table>
           <thead>
-            <tr>{this.tableHeaders}</tr>
+            <tr><th>Populate</th><th>Current Count</th><th>Last Run Time</th><th>Populating</th></tr>
           </thead>
           <tbody>
-            <tr>{this.tableBody2}</tr>
+            <tr><td><Button onClick={handlePopulateClick}>Populate</Button></td><td>{this.state.count}</td><td>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(this.state.lastRunDateTime)}</td><td>{String(this.state.analysisRun.populating)}</td></tr>
           </tbody>
         </Table>
-        <Button onClick={()=>this.onClick()}>Query</Button>
+        <Table>
+          <thead>
+          <tr><th>Query</th>{tableHeaders()}</tr>
+          </thead>
+          <tbody>
+            <tr><td><Button onClick={() => this.onClick()}>Query</Button></td>{tableBody()}</tr>
+          </tbody>
+        </Table>
         {queryResultDisplay()}
       </Container>
     );
