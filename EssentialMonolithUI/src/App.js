@@ -31,8 +31,8 @@ class App extends Component {
         <div className="container mt-3">
           <Switch>
           <Route exact path="/" component={Home} />
-            <Route exact path="/planning" component={Planning} />
-            <Route exact path="/analysis" component={Analysis} />
+            <Route path="/planning" component={Planning} />
+            <Route path="/analysis" component={Analysis} />
           </Switch>
         </div>
       </div>
