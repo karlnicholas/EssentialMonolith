@@ -97,10 +97,10 @@ export default class Analysis extends React.Component {
         return (
           <Table>
             <thead>
-              <tr><th>Amount</th><th>Mean</th><th>Min</th><th>Max</th></tr>
+              <tr><th>Amount</th><th>Mean</th><th>Min</th><th>Max</th><th>Std. Dev.</th></tr>
             </thead>
             <tbody>
-              <tr><td>{queryStats.sum.toLocaleString()}</td><td>{queryStats.mean.toLocaleString()}</td><td>{queryStats.min.toLocaleString()}</td><td>{queryStats.max.toLocaleString()}</td></tr>
+              <tr><td>{queryStats.sum.toLocaleString()}</td><td>{queryStats.mean.toLocaleString()}</td><td>{queryStats.min.toLocaleString()}</td><td>{queryStats.max.toLocaleString()}</td><td>{queryStats.standardDeviation.toLocaleString()}</td></tr>
             </tbody>
           </Table>
         );
