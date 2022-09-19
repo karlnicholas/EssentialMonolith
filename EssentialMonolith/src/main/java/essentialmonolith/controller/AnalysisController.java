@@ -1,5 +1,6 @@
 package essentialmonolith.controller;
 
+import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AnalysisController {
 //		return ResponseEntity.ok(analysisService.getBillingDimensions());
 //	}
 	@GetMapping("billingresult")
-	public ResponseEntity<SummaryStatistics> getBillingResult(
+	public ResponseEntity<OlapResult> getBillingResult(
 			@RequestParam(name = "Project", required = false) Long project, 
 			@RequestParam(name = "Employee", required = false) Long employee, 
 			@RequestParam(name = "Week", required = false) Long week, 

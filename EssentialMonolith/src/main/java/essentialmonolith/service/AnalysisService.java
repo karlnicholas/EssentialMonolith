@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.data.domain.Example;
 import org.springframework.scheduling.annotation.Async;
@@ -144,8 +145,8 @@ public class AnalysisService {
 		return CompletableFuture.completedFuture(null);
 	}
 
-	public SummaryStatistics getBillingQueryResult(Long project, Long employee, Long week, Long hoursRange, Long rateRange) {
-		SummaryStatistics summaryStatistics = new SummaryStatistics();
+	public OlapResult getBillingQueryResult(Long project, Long employee, Long week, Long hoursRange, Long rateRange) {
+		OlapResult olapResult = OlapResult.builder().summaryStatistics(new SummaryStatistics()).facts(new ArrayList<>()).build();
 		BillingFactBuilder b = BillingFact.builder();
 		if (project != null)
 			b.project(Project.builder().id(project).build());
@@ -157,9 +158,11 @@ public class AnalysisService {
 			b.hoursRangeDimension(HoursRangeDimension.builder().id(hoursRange).build());
 		if (rateRange != null)
 			b.rateRangeDimension(RateRangeDimension.builder().id(rateRange).build());
-		billingFactRepository.findAll(Example.of(b.build())).stream()
-				.mapToDouble(billingFact -> billingFact.getAmount().doubleValue()).forEach(summaryStatistics::addValue);
-		return summaryStatistics;
+		billingFactRepository.findAll(Example.of(b.build())).forEach(bf->{
+			olapResult.getFacts().add(bf);
+			olapResult.getSummaryStatistics().addValue(bf.getAmount().doubleValue());
+		});
+		return olapResult;
 	}
 
 	public boolean startPopulate() {

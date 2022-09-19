@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -148,9 +149,9 @@ public class AnalysisServiceTests {
 
 	@Test
 	public void getPurchaseResult() {
-		SummaryStatistics summaryStatistics = analysisService.getBillingQueryResult(null, null, null, null, null);
-		assertEquals(3200.0, summaryStatistics.getMean());
-		assertEquals(1, summaryStatistics.getN());
+		OlapResult olapResult = analysisService.getBillingQueryResult(null, null, null, null, null);
+		assertEquals(3200.0, olapResult.getSummaryStatistics().getMean());
+		assertEquals(1, olapResult.getSummaryStatistics().getN());
 	}
 
 }

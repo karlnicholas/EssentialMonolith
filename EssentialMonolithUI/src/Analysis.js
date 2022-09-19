@@ -21,7 +21,7 @@ export default class Analysis extends React.Component {
       dimensions: [],
       dropdownTitles: [],
       dropdownIds: [],
-      queryStats: null
+      olapResult: null
     }
     this.onTargetSelect = this.onTargetSelect.bind(this);
     this.onClick = this.onClick.bind(this);
@@ -65,9 +65,9 @@ export default class Analysis extends React.Component {
     }
     http.get('/analysis/billingresult' + queryString).then(response => {
       this.setState({
-        queryStats: response.data
+        olapResult: response.data
       });
-      console.log(this.state.queryStats);
+      console.log(this.state.olapResult);
     })
   }
   render() {
@@ -91,18 +91,28 @@ export default class Analysis extends React.Component {
           </td>));
       }
     }
-    let { queryStats } = this.state;
-    const queryResultDisplay = () => {
-      if (queryStats != null) {
+    let { olapResult } = this.state;
+    const olapResultDisplay = () => {
+      if (olapResult != null) {
         return (
-          <Table>
-            <thead>
-              <tr><th>Amount</th><th>Mean</th><th>Min</th><th>Max</th><th>Std. Dev.</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>{queryStats.sum.toLocaleString()}</td><td>{queryStats.mean.toLocaleString()}</td><td>{queryStats.min.toLocaleString()}</td><td>{queryStats.max.toLocaleString()}</td><td>{queryStats.standardDeviation.toLocaleString()}</td></tr>
-            </tbody>
-          </Table>
+          <div>
+            <Table>
+              <thead>
+              <tr><th>Total</th><th>Mean</th><th>Min</th><th>Max</th><th>Std. Dev.</th></tr>
+              </thead>
+              <tbody>
+              <tr><td>{olapResult.summaryStatistics.sum.toLocaleString()}</td><td>{olapResult.summaryStatistics.mean.toLocaleString()}</td><td>{olapResult.summaryStatistics.min.toLocaleString()}</td><td>{olapResult.summaryStatistics.max.toLocaleString()}</td><td>{olapResult.summaryStatistics.standardDeviation.toLocaleString()}</td></tr>
+              </tbody>
+            </Table>
+            <Table>
+              <thead>
+                <tr><th>Amount</th><th>Project</th><th>Employee</th><th>Week</th><th>Hours Range</th><th>Rate Range</th></tr>
+              </thead>
+              <tbody>
+              {this.state.olapResult.facts.map(fact => <tr><td>{fact.amount.toLocaleString()}</td><td>{fact.project.name.toLocaleString()}</td><td>{fact.employee.name.toLocaleString()}</td><td>{fact.weekDimension.name.toLocaleString()}</td><td>{fact.hoursRangeDimension.name.toLocaleString()}</td><td>{fact.rateRangeDimension.name.toLocaleString()}</td></tr>)}
+              </tbody>
+            </Table>
+          </div>
         );
       }
     }
@@ -124,7 +134,7 @@ export default class Analysis extends React.Component {
             <tr><td><Button onClick={() => this.onClick()}>Query</Button></td>{tableBody()}</tr>
           </tbody>
         </Table>
-        {queryResultDisplay()}
+        {olapResultDisplay()}
       </Container>
     );
   }

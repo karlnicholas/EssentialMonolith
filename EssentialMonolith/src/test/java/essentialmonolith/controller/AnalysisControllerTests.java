@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,8 @@ public class AnalysisControllerTests {
 	public void getQueryResult() throws Exception {
 		SummaryStatistics summaryStatistics = new SummaryStatistics();
 		summaryStatistics.addValue(10.0);
-		doReturn(summaryStatistics).when(analysisService).getBillingQueryResult(null, null, null, null, null);
+		OlapResult olapResult = OlapResult.builder().summaryStatistics(summaryStatistics).build();
+		doReturn(olapResult).when(analysisService).getBillingQueryResult(null, null, null, null, null);
 
 		mockMvc.perform(get("/api/analysis/billingresult")).andDo(print())
 		.andExpect(status().isOk())

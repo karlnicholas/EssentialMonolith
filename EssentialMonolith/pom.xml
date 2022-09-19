@@ -11,9 +11,6 @@
 	<artifactId>essentialmonolith</artifactId>
 	<name>Essential Monolith</name>
 	<description>Essential Monolith</description>
-	<properties>
-		<java.version>1.8</java.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -49,9 +46,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.7.3</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
