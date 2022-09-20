@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class BillingFact {
 	@EmbeddedId private BillingFactId billingFactId;
 	private BigDecimal amount;
@@ -29,4 +30,12 @@ public class BillingFact {
 	@ManyToOne
 	@MapsId("rateRangeDimensionId")
 	private RateRangeDimension rateRangeDimension;
+
+	public void setDimension(Dimension d) {
+		if (d instanceof Project) {
+			project = (Project) d;
+		} else if (d instanceof Employee) {
+			employee = (Employee) d;
+		}
+	}
 }

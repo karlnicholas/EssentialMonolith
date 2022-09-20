@@ -3,32 +3,22 @@ package essentialmonolith.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import essentialmonolith.dto.OlapResult;
+import essentialmonolith.model.*;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import essentialmonolith.dto.AnalysisDimension;
 import essentialmonolith.dto.AnalysisView;
-import essentialmonolith.model.AnalysisRun;
-import essentialmonolith.model.BillingFact;
 import essentialmonolith.model.BillingFact.BillingFactBuilder;
-import essentialmonolith.model.BillingFactId;
-import essentialmonolith.model.Employee;
-import essentialmonolith.model.HoursRangeDimension;
-import essentialmonolith.model.Project;
-import essentialmonolith.model.RateRangeDimension;
-import essentialmonolith.model.WeekDimension;
-import essentialmonolith.model.WorkLog;
 import essentialmonolith.repository.AnalysisRunRepository;
 import essentialmonolith.repository.BillingFactRepository;
 import essentialmonolith.repository.EmployeeRepository;
@@ -38,6 +28,11 @@ import essentialmonolith.repository.RateRangeDimensionRepository;
 import essentialmonolith.repository.WeekDimensionRepository;
 import essentialmonolith.repository.WorkLogRepository;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
+import javax.persistence.criteria.*;
 
 @Service
 @Slf4j
@@ -59,7 +54,7 @@ public class AnalysisService {
 			BillingFactRepository billingFactRepository, 
 			WeekDimensionRepository weekDimensionRepository, 
 			HoursRangeDimensionRepository hoursRangeDimensionRepository, 
-			RateRangeDimensionRepository rateRangeDimensionRepository 
+			RateRangeDimensionRepository rateRangeDimensionRepository
 	) {
 		this.workLogRepository = workLogRepository;
 		this.projectRepository = projectRepository;
@@ -197,6 +192,41 @@ public class AnalysisService {
 		return dimensions;
 	}
 
+	@PersistenceContext
+	private EntityManager entityManager;
 
+	public OlapResult getBillingQueryResultPlay(List<String> groupByList, List<String> whereList) {
+		OlapResult olapResult = OlapResult.builder().summaryStatistics(new SummaryStatistics()).facts(new ArrayList<>()).build();
 
-}
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<Tuple> q = cb.createQuery(Tuple.class);
+		Root<BillingFact> bf = q.from(BillingFact.class);
+		Path<Number> bfAmount = bf.get("amount");
+//		Path<Long> pId = bf.get("employee").get("id");
+		Expression<Number> sum = cb.sum(bfAmount);
+
+		Expression[] exs = new Expression[groupByList.size()];
+		Selection[] sels = new Selection[exs.length+1];
+		sels[0] = sum;
+		int index = 0;
+		for ( String groupBy: groupByList) {
+			Path<Dimension> d = bf.get(groupBy);
+			exs[index++] = d;
+			sels[index] = d;
+		}
+		q.select(cb.construct(Tuple.class, sels));
+//		q.where(cb.equal(pId, 1L));
+		q.groupBy(exs);
+		entityManager.createQuery(q).getResultList().forEach(qr->{
+			BillingFact bfr = new BillingFact();
+			bfr.setAmount(qr.get(0, BigDecimal.class));
+			for ( int i=0; i < groupByList.size(); ++i) {
+				bfr.setDimension(qr.get(i+1, Dimension.class));
+			}
+			olapResult.getFacts().add(bfr);
+			olapResult.getSummaryStatistics().addValue(bfr.getAmount().doubleValue());
+		});
+		return olapResult;
+	}
+};

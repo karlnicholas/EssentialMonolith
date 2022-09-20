@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.service.AnalysisService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/analysis")
 public class AnalysisController {
@@ -45,5 +47,9 @@ public class AnalysisController {
 			analysisService.populate();
 		}
 		return ResponseEntity.ok().build();
+	}
+	@GetMapping("play")
+	public ResponseEntity<OlapResult> getPlay() {
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), null));
 	}
 }
