@@ -1,5 +1,6 @@
 package essentialmonolith.controller;
 
+import essentialmonolith.dto.IdPair;
 import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ public class AnalysisController {
 	}
 	@GetMapping("play")
 	public ResponseEntity<OlapResult> getPlay() {
-		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), null));
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, List.of(new IdPair("employee", 1L))));
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
 	}
 }

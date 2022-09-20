@@ -7,7 +7,9 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import essentialmonolith.dto.IdPair;
 import essentialmonolith.dto.OlapResult;
 import essentialmonolith.model.*;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -195,7 +197,7 @@ public class AnalysisService {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public OlapResult getBillingQueryResultPlay(List<String> groupByList, List<String> whereList) {
+	public OlapResult getBillingQueryResultPlay(List<String> groupByList, List<IdPair> whereList) {
 		OlapResult olapResult = OlapResult.builder().summaryStatistics(new SummaryStatistics()).facts(new ArrayList<>()).build();
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -203,25 +205,44 @@ public class AnalysisService {
 		CriteriaQuery<Tuple> q = cb.createQuery(Tuple.class);
 		Root<BillingFact> bf = q.from(BillingFact.class);
 		Path<Number> bfAmount = bf.get("amount");
-//		Path<Long> pId = bf.get("employee").get("id");
 		Expression<Number> sum = cb.sum(bfAmount);
 
-		Expression[] exs = new Expression[groupByList.size()];
-		Selection[] sels = new Selection[exs.length+1];
-		sels[0] = sum;
-		int index = 0;
-		for ( String groupBy: groupByList) {
-			Path<Dimension> d = bf.get(groupBy);
-			exs[index++] = d;
-			sels[index] = d;
+		int selectSize;
+		if ( groupByList != null ) {
+			selectSize = groupByList.size();
+			Expression[] exs = new Expression[groupByList.size()];
+			Selection[] sels = new Selection[exs.length+1];
+			sels[0] = sum;
+			int index = 0;
+			for ( String groupBy: groupByList) {
+				Path<Dimension> d = bf.get(groupBy);
+				exs[index++] = d;
+				sels[index] = d;
+			}
+			q.select(cb.construct(Tuple.class, sels));
+			q.groupBy(exs);
+		} else {
+			List<String> ps = List.of("amount", "project", "employee", "weekDimension", "hoursRangeDimension", "rateRangeDimension");
+			selectSize = ps.size() - 1;
+			q.select(cb.construct(Tuple.class, ps.stream().map(p->bf.get(p)).collect(Collectors.toList()).toArray(new Path[ps.size()])));
 		}
-		q.select(cb.construct(Tuple.class, sels));
-//		q.where(cb.equal(pId, 1L));
-		q.groupBy(exs);
+
+		if ( whereList != null ) {
+			Path<Long>[] whereProperties = new Path[whereList.size()];
+			int index = 0;
+			for (IdPair idPair: whereList) {
+				whereProperties[index++] = bf.get(idPair.getProperty()).get("id");
+			}
+			Predicate[] predicates = new Predicate[whereList.size()];
+			for ( int i = 0; i < whereProperties.length; ++i) {
+				predicates[i] = cb.equal(whereProperties[i], whereList.get(i).getId());
+			}
+			q.where(cb.or(predicates));
+		}
 		entityManager.createQuery(q).getResultList().forEach(qr->{
 			BillingFact bfr = new BillingFact();
 			bfr.setAmount(qr.get(0, BigDecimal.class));
-			for ( int i=0; i < groupByList.size(); ++i) {
+			for ( int i=0; i < selectSize; ++i) {
 				bfr.setDimension(qr.get(i+1, Dimension.class));
 			}
 			olapResult.getFacts().add(bfr);

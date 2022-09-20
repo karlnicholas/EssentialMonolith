@@ -1,6 +1,7 @@
 package essentialmonolith.model;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.persistence.*;
 
@@ -36,6 +37,12 @@ public class BillingFact {
 			project = (Project) d;
 		} else if (d instanceof Employee) {
 			employee = (Employee) d;
+		} else if (d instanceof WeekDimension) {
+			weekDimension = (WeekDimension) d;
+		} else if (d instanceof HoursRangeDimension) {
+			hoursRangeDimension = (HoursRangeDimension) d;
+		} else if (d instanceof RateRangeDimension) {
+			rateRangeDimension = (RateRangeDimension) d;
 		}
 	}
 }
