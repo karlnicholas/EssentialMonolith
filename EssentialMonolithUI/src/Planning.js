@@ -1,21 +1,10 @@
 import React from "react";
 import http from "./http-common";
-import Container from "react-bootstrap/Container";
-import BootstrapTable from "react-bootstrap-table-next";
+import Table from "react-bootstrap/Table";
 
 export default class Planning extends React.Component {
   state = {
-    worklogs: [],
-    columns: [
-      { dataField: "id", text: "ID" },
-      { dataField: "entryDate", text: "Entry Date" },
-      { dataField: "hours", text: "Hours" },
-      { dataField: "rate", text: "Rate" },
-      { dataField: "project.name", text: "Project" },
-      { dataField: "project.client.name", text: "Client" },
-      { dataField: "employee.name", text: "Employee" },
-      { dataField: "employee.department.name", text: "Department" }
-    ]
+    worklogs: []
   }
   componentDidMount() {
     http.get('/planning').then(response => {
@@ -25,14 +14,29 @@ export default class Planning extends React.Component {
     });
   }
   render() {
+    const tableBody = () => {
+      return (
+        this.state.worklogs.map(r => <tr key={r.id}>
+          <td>{r.id}</td>
+          <td>{r.entryDate}</td>
+          <td>{r.hours}</td>
+          <td>{r.rate}</td>
+          <td>{r.project.name}</td>
+          <td>{r.project.client.name}</td>
+          <td>{r.employee.name}</td>
+          <td>{r.employee.department.name}</td>
+          </tr>)
+        );
+    }
     return (
-      <Container>
-        <BootstrapTable
-          keyField='id'
-          bootstrap4
-          data={this.state.worklogs}
-          columns={this.state.columns} />
-      </Container>
+      <div>
+        <Table>
+          <thead>
+          <tr><th>ID</th><th>Entry Date</th><th>Hours</th><th>Rate</th><th>Project</th><th>Client</th><th>Employee</th><th>Department</th></tr>
+          </thead>
+          <tbody>{tableBody()}</tbody>
+        </Table>
+      </div>
     );
   }
 }

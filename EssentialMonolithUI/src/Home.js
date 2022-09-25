@@ -1,7 +1,6 @@
 import React from "react";
 import http from "./http-common";
-import Container from "react-bootstrap/Container";
-import BootstrapTable from "react-bootstrap-table-next";
+import Table from "react-bootstrap/Table";
 
 export default class Home extends React.Component {
   state = {
@@ -20,14 +19,24 @@ export default class Home extends React.Component {
     });
   }
   render() {
+    const tableBody = () => {
+      return (
+        this.state.employees.map(e => <tr key={e.id}>
+          <td>{e.id}</td>
+          <td>{e.name}</td>
+          <td>{e.department.name}</td>
+          </tr>)
+        );
+    }
     return (
-      <Container>
-        <BootstrapTable
-          bootstrap4
-          keyField='id'
-          data={this.state.employees}
-          columns={this.state.columns} />
-      </Container>
+      <div>
+        <Table>
+          <thead>
+          <tr><th>Product ID</th><th>Product Name</th><th>Department</th></tr>
+          </thead>
+          <tbody>{tableBody()}</tbody>
+        </Table>
+      </div>
     );
   }
 }
