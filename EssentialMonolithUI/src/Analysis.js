@@ -5,12 +5,12 @@ import Button from "react-bootstrap/Button";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import Table from "react-bootstrap/Table";
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import Card from "react-bootstrap/Card";
 
 function handlePopulateClick() {
   http.get('/analysis/populate');
   window.location.reload();
 }
-
 export default class Analysis extends React.Component {
   constructor(props) {
     super(props);
@@ -21,7 +21,7 @@ export default class Analysis extends React.Component {
       dimensions: [],
       dropdownTitles: [],
       dropdownIds: [],
-      olapResult: null
+      olapResult: null, 
     }
     this.onTargetSelect = this.onTargetSelect.bind(this);
     this.onClick = this.onClick.bind(this);
@@ -78,6 +78,32 @@ export default class Analysis extends React.Component {
           );
       }
     }
+    const card = () => {
+      if (this.state.dimensions.length > 0) {
+        return (this.state.dimensions.map((dlist, index) =>
+              <DropdownButton key={dlist.name} id={dlist.name} title={this.state.dropdownTitles[index]}>
+                {dlist.dimensions.map(dvalue =>
+                  <DropdownItem key={dvalue.id} value={dvalue.id} onSelect={() => this.onTargetSelect(dvalue.name, dvalue.id, index)}>
+                    {dvalue.name}
+                  </DropdownItem>)}
+              </DropdownButton>
+            ));
+        
+      }
+    }
+    const querygroup = () => {
+      if (this.state.dimensions.length > 0) {
+        return (this.state.dimensions.map((dlist, index) =>
+              <DropdownButton key={dlist.name} id={dlist.name} title={dlist.name}>
+                {dlist.dimensions.map(dvalue =>
+                  <DropdownItem key={dvalue.id} value={dvalue.id} onSelect={() => this.onTargetSelect(dvalue.name, dvalue.id, index)}>
+                    {dvalue.name}
+                  </DropdownItem>)}
+              </DropdownButton>
+            ));
+        
+      }
+    }
     const tableBody = () => {
       if (this.state.dimensions.length > 0) {
         return (this.state.dimensions.map((dlist, index) =>
@@ -126,6 +152,9 @@ export default class Analysis extends React.Component {
             <tr><td><Button onClick={handlePopulateClick}>Populate</Button></td><td>{this.state.count}</td><td>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(this.state.lastRunDateTime)}</td><td>{String(this.state.analysisRun.populating)}</td></tr>
           </tbody>
         </Table>
+        <Card>
+        {card()}
+        </Card>
         <Table>
           <thead>
           <tr><th>Query</th>{tableHeaders()}</tr>
