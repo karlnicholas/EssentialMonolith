@@ -86,6 +86,11 @@ public class AnalysisService {
 	@Async
 	public CompletableFuture<Void> populate() {
 		try {
+			AnalysisRun analysisRun = analysisRunRepository.findById(1L).get();
+			analysisRun.setLastRunTime(LocalDateTime.now());
+			analysisRun.setPopulating(Boolean.TRUE);
+			analysisRunRepository.save(analysisRun);
+
 			billingFactRepository.deleteAll();
 			weekDimensionRepository.deleteAll();
 			hoursRangeDimensionRepository.deleteAll();
@@ -139,6 +144,7 @@ public class AnalysisService {
 			analysisRun.setPopulating(Boolean.FALSE);
 			analysisRunRepository.save(analysisRun);
 		}
+	System.out.println("POPULATED");
 		return CompletableFuture.completedFuture(null);
 	}
 
@@ -162,13 +168,13 @@ public class AnalysisService {
 		return olapResult;
 	}
 
-	public boolean startPopulate() {
+	public AnalysisRun getAnalysisRunState() {
 		AnalysisRun analysisRun = analysisRunRepository.findById(1L).get();
-		if ( analysisRun.getPopulating() ) return false;
+		if ( analysisRun.getPopulating() ) return analysisRun;
 		analysisRun.setLastRunTime(LocalDateTime.now());
-		analysisRun.setPopulating(Boolean.TRUE);
-		analysisRunRepository.save(analysisRun);
-		return true;
+		analysisRun.setPopulating(Boolean.FALSE);
+		analysisRun = analysisRunRepository.save(analysisRun);
+		return analysisRun;
 	}
 	
 	public AnalysisView getAnalysisView() {

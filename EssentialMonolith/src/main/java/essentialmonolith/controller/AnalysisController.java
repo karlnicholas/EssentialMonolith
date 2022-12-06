@@ -2,13 +2,11 @@ package essentialmonolith.controller;
 
 import essentialmonolith.dto.IdPair;
 import essentialmonolith.dto.OlapResult;
+import essentialmonolith.model.AnalysisRun;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.service.AnalysisService;
@@ -43,16 +41,25 @@ public class AnalysisController {
 		return ResponseEntity.ok(analysisService.getBillingQueryResult(project, employee, week, hoursRange, rateRange));
 	}
 	@GetMapping("populate")
-	public ResponseEntity<Void> getStartPopulate() {
-		if ( analysisService.startPopulate() ) {
+	public ResponseEntity<AnalysisRun> getStartPopulate() {
+		AnalysisRun analysisRun = analysisService.getAnalysisRunState();
+		if ( !analysisRun.getPopulating() ) {
 			analysisService.populate();
+			analysisRun.setPopulating(true);
 		}
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok().body(analysisRun);
 	}
 	@GetMapping("play")
 	public ResponseEntity<OlapResult> getPlay() {
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, List.of(new IdPair("employee", 1L))));
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
+	}
+	@PostMapping("olap")
+	public ResponseEntity<OlapResult> getPlay(@RequestBody List<IdPair> idPairs) {
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, List.of(new IdPair("employee", 1L))));
+		System.out.println("idPairs: " + idPairs);
 		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
 	}
 }
