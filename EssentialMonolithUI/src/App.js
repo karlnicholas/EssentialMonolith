@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Switch, Route, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 import Home from "./Home";
 import Planning from "./Planning";
@@ -30,7 +29,7 @@ class App extends Component {
 
         <div className="container mt-3">
           <Switch>
-          <Route exact path="/" component={Home} />
+            <Route exact path="/" component={Home} />
             <Route path="/planning" component={Planning} />
             <Route path="/analysis" component={Analysis} />
           </Switch>

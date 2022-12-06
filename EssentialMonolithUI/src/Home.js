@@ -1,6 +1,5 @@
 import React from "react";
 import http from "./http-common";
-import Table from "react-bootstrap/Table";
 
 export default class Home extends React.Component {
   state = {
@@ -30,12 +29,12 @@ export default class Home extends React.Component {
     }
     return (
       <div>
-        <Table>
+        <table className="table">
           <thead>
           <tr><th>Product ID</th><th>Product Name</th><th>Department</th></tr>
           </thead>
           <tbody>{tableBody()}</tbody>
-        </Table>
+        </table>
       </div>
     );
   }

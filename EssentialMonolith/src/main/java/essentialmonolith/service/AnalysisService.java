@@ -144,7 +144,6 @@ public class AnalysisService {
 			analysisRun.setPopulating(Boolean.FALSE);
 			analysisRunRepository.save(analysisRun);
 		}
-	System.out.println("POPULATED");
 		return CompletableFuture.completedFuture(null);
 	}
 
