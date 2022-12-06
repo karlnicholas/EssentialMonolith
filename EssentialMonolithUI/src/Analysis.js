@@ -119,7 +119,30 @@ function AnalysisPage() {
     })();
   };
 
-  
+  const olapResultDisplay = () => {
+    if (olapResult != null) {
+      return (
+        <div>
+          <table className="table">
+            <thead>
+              <tr><th>Total</th><th>Mean</th><th>Min</th><th>Max</th><th>Std. Dev.</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>{olapResult.summaryStatistics.sum.toLocaleString()}</td><td>{olapResult.summaryStatistics.mean.toLocaleString()}</td><td>{olapResult.summaryStatistics.min.toLocaleString()}</td><td>{olapResult.summaryStatistics.max.toLocaleString()}</td><td>{olapResult.summaryStatistics.standardDeviation.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+          <table className="table">
+            <thead>
+              <tr><th>Amount</th><th>Project</th><th>Employee</th><th>Week</th><th>Hours Range</th><th>Rate Range</th></tr>
+            </thead>
+            <tbody>
+              {olapResult.facts.map((fact, index) => <tr key={index}><td>{fact.amount.toLocaleString()}</td><td>{fact.project.name.toLocaleString()}</td><td>{fact.employee.name.toLocaleString()}</td><td>{fact.weekDimension.name.toLocaleString()}</td><td>{fact.hoursRangeDimension.name.toLocaleString()}</td><td>{fact.rateRangeDimension.name.toLocaleString()}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+  }  
 const onWhereSelect = (dname, name, id) => {
   let ws = whereSelects.slice(); //creates the clone of the state
   ws.push({ 'display': dname + ':' + name + ":" + id, 'property': dname, 'id': id });
@@ -162,31 +185,6 @@ const onWhereSelect = (dname, name, id) => {
       {olapResultDisplay(olapResult)}
     </div>
   );
-}
-
-function olapResultDisplay(olapResult) {
-  if (olapResult != null) {
-    return (
-      <div>
-        <table className="table">
-          <thead>
-            <tr><th>Total</th><th>Mean</th><th>Min</th><th>Max</th><th>Std. Dev.</th></tr>
-          </thead>
-          <tbody>
-            Fucked this up
-          </tbody>
-        </table>
-        <table className="table">
-          <thead>
-            <tr><th>Amount</th><th>Project</th><th>Employee</th><th>Week</th><th>Hours Range</th><th>Rate Range</th></tr>
-          </thead>
-          <tbody>
-            {olapResult.facts.map((fact, index) => <tr key={index}><td>{fact.amount.toLocaleString()}</td><td>{fact.project.name.toLocaleString()}</td><td>{fact.employee.name.toLocaleString()}</td><td>{fact.weekDimension.name.toLocaleString()}</td><td>{fact.hoursRangeDimension.name.toLocaleString()}</td><td>{fact.rateRangeDimension.name.toLocaleString()}</td></tr>)}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
 }
 
 export default function Analysis() {
