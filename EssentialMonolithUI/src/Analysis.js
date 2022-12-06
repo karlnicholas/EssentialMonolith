@@ -1,5 +1,12 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import http from "./http-common";
+
+function newQueryParams(length) {
+  return new Array(length).fill(0).map(() => ({
+    title: '', 
+    id: null
+  }));
+}
 
 function AnalysisPage() {
   const [analysisRun, setAnalysisRun] = useState(null);
@@ -7,22 +14,16 @@ function AnalysisPage() {
   const [olapResult, setOlapResult] = useState(null);
   const [whereSelects, setWhereSelects] = useState([]);
   const [factCount, setFactCount] = useState(0);
-  const dropdownTitles = useRef([]);
-  const dropdownIds = useRef([]);
+  const [queryParams, setQueryParams] = useState([]);
 
   useEffect(() => {
     http.get('/analysis').then(response => {
       setDimensions(response.data.analysisDimensions);
       setAnalysisRun(response.data.analysisRun);
       setFactCount(response.data.factCount);
-      updateDimensions(response.data.analysisDimensions);
-      });
+      setQueryParams(newQueryParams(response.data.analysisDimensions.length));
+    });
   }, []);
-
-  const updateDimensions = (dimensions) => {
-    dropdownTitles.current = new Array(dimensions.length).fill("");
-    dropdownIds.current = new Array(dimensions.length).fill(null);
-  };
 
 
   const showAnalysisRun = () => {
@@ -36,19 +37,21 @@ function AnalysisPage() {
       );
     }
   }
+
   const tableHeaders = () => {
     if (dimensions.length > 0) {
       return (
         dimensions.map(dimension => <th key={dimension.name}>{dimension.name}</th>)
       );
     }
-  };
+  }
+
   const tableBody = () => {
     if (dimensions.length > 0) {
       return (dimensions.map((dlist, index) =>
         <td key={dlist.name}>
           <div key={index} className="dropdown">
-            <button className='btn btn-primary dropdown-toggle' type="button" data-bs-toggle="dropdown" aria-expanded="false" id={dlist.name}>{dimensions[index].title !== undefined ? dimensions[index].title : ''}</button >
+            <button className='btn btn-primary dropdown-toggle' type="button" data-bs-toggle="dropdown" aria-expanded="false" id={dlist.name}>{queryParams[index].title}</button >
             <ul className="dropdown-menu">
               <li key={index}><button className='dropdown-item' type="button" onClick={() => onTargetSelect("", null, index)}>&nbsp;</button></li>
               {dlist.dimensions.map((dvalue, idx) =>
@@ -60,6 +63,7 @@ function AnalysisPage() {
       );
     }
   }
+  
   const card = () => {
     if (dimensions.length > 0) {
       return (dimensions.map((dlist, index) =>
@@ -67,43 +71,44 @@ function AnalysisPage() {
           <button className="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" key={dlist.name} id={dlist.name}>{dlist.name}</button >
           <ul className="dropdown-menu">
             {dlist.dimensions.map((dvalue, index) =>
-              <li key={index}><button className="dropdown-item" type='button' onClick={() => onWhereSelect(dimensions[index].name, dvalue.name, dvalue.id, whereSelects, setWhereSelects)}>{dvalue.name}</button></li>
+              <li key={index}><button className="dropdown-item" type='button' onClick={() => onWhereSelect(dimensions[index].name, dvalue.name, dvalue.id)}>{dvalue.name}</button></li>
             )}
           </ul>
         </div>
       ));
     }
   }
+
   const handlePopulateClick = () => {
     http.get('/analysis/populate').then(response => {
       setAnalysisRun(response.data);
     });
   }
+
   const handleRefreshClick = () => {
     http.get('/analysis').then(response => {
       setDimensions(response.data.analysisDimensions);
       setAnalysisRun(response.data.analysisRun);
       setFactCount(response.data.factCount);
-      updateDimensions(response.data.analysisDimensions);
+      setQueryParams(newQueryParams(response.data.analysisDimensions.length));
     });
   }
+
   const onTargetSelect = (name, id, index) => {
-    let titles = dropdownTitles.current.slice(); //creates the clone of the state
-    titles[index] = name;
-    let ids = dropdownIds.current.slice(); //creates the clone of the state
-    ids[index] = id;
-    dropdownTitles.current = titles;
-    dropdownIds.current = ids;
-  };
+    let params = queryParams.slice(); //creates the clone of the state
+    params[index].title = name;
+    params[index].id = id;
+    setQueryParams(params);
+  }
 
   const onQueryClick = () => {
     var queryString = '';
     var queryMark = '?';
     var i;
-    for (i = 0; i < dropdownTitles.length; ++i) {
-      var select = dropdownIds[i];
-      if (select !== null) {
-        queryString += queryMark + dimensions[i].name + '=' + select;
+    for (i = 0; i < queryParams.length; ++i) {
+      var select = queryParams[i];
+      if (select.id !== null) {
+        queryString += queryMark + dimensions[i].name + '=' + select.id;
         queryMark = '&';
       }
     }
@@ -113,6 +118,26 @@ function AnalysisPage() {
       })
     })();
   };
+
+  
+const onWhereSelect = (dname, name, id) => {
+  let ws = whereSelects.slice(); //creates the clone of the state
+  ws.push({ 'display': dname + ':' + name + ":" + id, 'property': dname, 'id': id });
+  setWhereSelects(ws);
+  // var whereList = [];
+  // var i;
+  // for (i = 0; i < this.state.whereSelects.length; ++i) {
+  //   whereList.push({'property': this.state.whereSelects[i].property, 'id': this.state.whereSelects[i].id});
+  // }
+  // (async()=>{
+  //   http.post('/analysis/olap', whereList).then(response => {
+  //     this.setState({
+  //       olapResult: response.data
+  //     });
+  //   })
+  //  })();
+  }
+
   return (
     <div>
       <table className="table">
@@ -138,24 +163,6 @@ function AnalysisPage() {
     </div>
   );
 }
-
-function onWhereSelect(dname, name, id, whereSelects, setWhereSelects) {
-  let ws = whereSelects.slice(); //creates the clone of the state
-  ws.push({ 'display': dname + ':' + name + ":" + id, 'property': dname, 'id': id });
-  setWhereSelects(ws);
-  // var whereList = [];
-  // var i;
-  // for (i = 0; i < this.state.whereSelects.length; ++i) {
-  //   whereList.push({'property': this.state.whereSelects[i].property, 'id': this.state.whereSelects[i].id});
-  // }
-  // (async()=>{
-  //   http.post('/analysis/olap', whereList).then(response => {
-  //     this.setState({
-  //       olapResult: response.data
-  //     });
-  //   })
-  //  })();
-};
 
 function olapResultDisplay(olapResult) {
   if (olapResult != null) {
