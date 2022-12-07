@@ -64,14 +64,14 @@ function AnalysisPage() {
     }
   }
   
-  const card = () => {
+  const whereDropdowns = () => {
     if (dimensions.length > 0) {
       return (dimensions.map((dlist, index) =>
         <div key={index} className="dropdown">
           <button className="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" key={dlist.name} id={dlist.name}>{dlist.name}</button >
           <ul className="dropdown-menu">
-            {dlist.dimensions.map((dvalue, index) =>
-              <li key={index}><button className="dropdown-item" type='button' onClick={() => onWhereSelect(dimensions[index].name, dvalue.name, dvalue.id)}>{dvalue.name}</button></li>
+            {dlist.dimensions.map((dvalue, idx) =>
+              <li key={idx}><button className="dropdown-item" type='button' onClick={() => onWhereSelect(dimensions[index].name, dvalue.name, dvalue.id)}>{dvalue.name}</button></li>
             )}
           </ul>
         </div>
@@ -143,22 +143,34 @@ function AnalysisPage() {
       );
     }
   }  
-const onWhereSelect = (dname, name, id) => {
-  let ws = whereSelects.slice(); //creates the clone of the state
-  ws.push({ 'display': dname + ':' + name + ":" + id, 'property': dname, 'id': id });
-  setWhereSelects(ws);
-  // var whereList = [];
-  // var i;
-  // for (i = 0; i < this.state.whereSelects.length; ++i) {
-  //   whereList.push({'property': this.state.whereSelects[i].property, 'id': this.state.whereSelects[i].id});
-  // }
-  // (async()=>{
-  //   http.post('/analysis/olap', whereList).then(response => {
-  //     this.setState({
-  //       olapResult: response.data
-  //     });
-  //   })
-  //  })();
+  const onWhereSelect = (dname, name, id) => {
+    let ws = whereSelects.slice(); //creates the clone of the state
+    const fi = ws.findIndex(e => (e.property === dname && e.id === id));
+    if ( fi < 0 ) {
+      ws.push({ display: dname + ':' + name, property: dname, id: id });
+    } else {
+      ws.splice(fi, 1);
+    }
+    setWhereSelects(ws);
+    var whereList = [];
+    var i;
+    for (i = 0; i < ws.length; ++i) {
+      whereList.push({'property': ws[i].property, 'id': ws[i].id});
+    }
+    (async()=>{
+      http.post('/analysis/olap', whereList).then(response => {
+        // this.setState({
+        //   olapResult: response.data
+        // });
+      })
+     })();
+    }
+
+  const showWhereSelects = () => {
+    const buttons = whereSelects.map((s, i) => 
+        <button type='button' className='btn btn-primary text-nowrap'>{s.display}</button>
+    );
+    return (buttons);
   }
 
   return (
@@ -171,8 +183,19 @@ const onWhereSelect = (dname, name, id) => {
           {showAnalysisRun()}
         </tbody>
       </table>
-      <div>
-        {card()}
+      <div className="row justify-content-start">
+        <div className="card" style={{width:'10rem'}}>
+          <div className="card-body">
+            <h6 className="card-title">Select</h6>
+            {whereDropdowns()}
+          </div>
+        </div>
+        <div className="card" style={{width:'14rem'}}>
+          <div className="card-body">
+            <h6 className="card-title">Selected</h6>
+            {showWhereSelects()}
+          </div>
+        </div>
       </div>
       <table className="table">
         <thead>
