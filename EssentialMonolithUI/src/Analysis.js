@@ -155,20 +155,18 @@ function AnalysisPage() {
     var whereList = [];
     var i;
     for (i = 0; i < ws.length; ++i) {
-      whereList.push({'property': ws[i].property, 'id': ws[i].id});
+      whereList.push({'property': ws[i].property.toLowerCase(), 'id': ws[i].id});
     }
     (async()=>{
       http.post('/analysis/olap', whereList).then(response => {
-        // this.setState({
-        //   olapResult: response.data
-        // });
+        setOlapResult(response.data);
       })
      })();
     }
 
   const showWhereSelects = () => {
     const buttons = whereSelects.map((s, i) => 
-        <button type='button' className='btn btn-primary text-nowrap'>{s.display}</button>
+        <button key={i} type='button' className='btn btn-primary text-nowrap'>{s.display}</button>
     );
     return (buttons);
   }

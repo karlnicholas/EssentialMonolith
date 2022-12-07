@@ -57,9 +57,9 @@ public class AnalysisController {
 	}
 	@PostMapping("olap")
 	public ResponseEntity<OlapResult> getPlay(@RequestBody List<IdPair> idPairs) {
-//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
-//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, List.of(new IdPair("employee", 1L))));
 		System.out.println("idPairs: " + idPairs);
-		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, idPairs));
+//		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
 	}
 }
