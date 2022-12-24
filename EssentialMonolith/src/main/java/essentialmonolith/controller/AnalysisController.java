@@ -1,17 +1,14 @@
 package essentialmonolith.controller;
 
-import essentialmonolith.dto.IdPair;
+import essentialmonolith.dto.OlapQuery;
 import essentialmonolith.dto.OlapResult;
 import essentialmonolith.model.AnalysisRun;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.service.AnalysisService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/analysis")
@@ -53,13 +50,13 @@ public class AnalysisController {
 	public ResponseEntity<OlapResult> getPlay() {
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, List.of(new IdPair("employee", 1L))));
-		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null));
 	}
 	@PostMapping("olap")
-	public ResponseEntity<OlapResult> getPlay(@RequestBody List<IdPair> idPairs) {
-		System.out.println("idPairs: " + idPairs);
+	public ResponseEntity<OlapResult> getPlay(@RequestBody OlapQuery olapQuery) {
+		System.out.println("olapQuery: " + olapQuery);
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(List.of("project", "employee" ), List.of(new IdPair("employee", 1L), new IdPair("employee", 2L))));
-		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, idPairs));
+		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(olapQuery));
 //		return ResponseEntity.ok(analysisService.getBillingQueryResultPlay(null, null));
 	}
 }

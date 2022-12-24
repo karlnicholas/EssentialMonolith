@@ -8,16 +8,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import essentialmonolith.dto.IdPair;
-import essentialmonolith.dto.OlapResult;
+import essentialmonolith.dto.*;
 import essentialmonolith.model.*;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.springframework.data.domain.Example;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import essentialmonolith.dto.AnalysisDimension;
-import essentialmonolith.dto.AnalysisView;
 import essentialmonolith.model.BillingFact.BillingFactBuilder;
 import essentialmonolith.repository.AnalysisRunRepository;
 import essentialmonolith.repository.BillingFactRepository;
@@ -95,14 +92,14 @@ public class AnalysisService {
 			rateRangeRepository.deleteAll();
 
 			Map<String, Week> weeksMap = workLogRepository.findAll().stream().map(WorkLog::getEntryDate)
-					.map(date -> getWeek(date))
+					.map(this::getWeek)
 					.distinct()
 					.map(week -> Week.builder().name(week).build())
 					.map(weekRepository::save)
 					.collect(Collectors.toMap(Week::getName, Function.identity()));
 
 			Map<String, HoursRange> hoursRangeMap = workLogRepository.findAll().stream().map(WorkLog::getHours)
-					.map(hours -> getHoursRange(hours))
+					.map(this::getHoursRange)
 					.distinct()
 					.map(hoursRange -> HoursRange.builder().name(hoursRange).build())
 					.map(hoursRangeRepository::save)
@@ -185,22 +182,22 @@ public class AnalysisService {
 	private List<AnalysisDimension> getBillingDimensions() {
 		List<AnalysisDimension> dimensions = new ArrayList<>();
 		dimensions.add(AnalysisDimension.builder().name("Project")
-				.dimensions(projectRepository.findAll().stream().collect(Collectors.toList())).build());
+				.dimensions(new ArrayList<>(projectRepository.findAll())).build());
 		dimensions.add(AnalysisDimension.builder().name("Employee")
-				.dimensions(employeeRepository.findAll().stream().collect(Collectors.toList())).build());
+				.dimensions(new ArrayList<>(employeeRepository.findAll())).build());
 		dimensions.add(AnalysisDimension.builder().name("Week")
-				.dimensions(weekRepository.findAll().stream().collect(Collectors.toList())).build());
+				.dimensions(new ArrayList<>(weekRepository.findAll())).build());
 		dimensions.add(AnalysisDimension.builder().name("HoursRange")
-				.dimensions(hoursRangeRepository.findAll().stream().collect(Collectors.toList())).build());
+				.dimensions(new ArrayList<>(hoursRangeRepository.findAll())).build());
 		dimensions.add(AnalysisDimension.builder().name("RateRange")
-				.dimensions(rateRangeRepository.findAll().stream().collect(Collectors.toList())).build());
+				.dimensions(new ArrayList<>(rateRangeRepository.findAll())).build());
 		return dimensions;
 	}
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public OlapResult getBillingQueryResultPlay(List<String> groupByList, List<IdPair> whereList) {
+	public OlapResult getBillingQueryResultPlay(OlapQuery olapQuery) {
 		OlapResult olapResult = OlapResult.builder().summaryStatistics(new SummaryStatistics()).facts(new ArrayList<>()).build();
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -211,13 +208,13 @@ public class AnalysisService {
 		Expression<Number> sum = cb.sum(bfAmount);
 
 		int selectSize;
-		if ( groupByList != null ) {
-			selectSize = groupByList.size();
-			Expression[] exs = new Expression[groupByList.size()];
+		if ( olapQuery.getGroupByList() != null ) {
+			selectSize = olapQuery.getGroupByList().size();
+			Expression[] exs = new Expression[olapQuery.getGroupByList().size()];
 			Selection[] sels = new Selection[exs.length+1];
 			sels[0] = sum;
 			int index = 0;
-			for ( String groupBy: groupByList) {
+			for ( String groupBy: olapQuery.getGroupByList()) {
 				Path<Dimension> d = bf.get(groupBy);
 				exs[index++] = d;
 				sels[index] = d;
@@ -227,18 +224,18 @@ public class AnalysisService {
 		} else {
 			List<String> ps = List.of("amount", "project", "employee", "week", "hoursRange", "rateRange");
 			selectSize = ps.size() - 1;
-			q.select(cb.construct(Tuple.class, ps.stream().map(p->bf.get(p)).collect(Collectors.toList()).toArray(new Path[ps.size()])));
+			q.select(cb.construct(Tuple.class, ps.stream().map(bf::get).collect(Collectors.toList()).toArray(new Path[ps.size()])));
 		}
 
-		if ( whereList != null ) {
-			Path<Long>[] whereProperties = new Path[whereList.size()];
+		if ( olapQuery.getWhereList() != null ) {
+			Path<Long>[] whereProperties = new Path[olapQuery.getWhereList().size()];
 			int index = 0;
-			for (IdPair idPair: whereList) {
+			for (IdPair idPair: olapQuery.getWhereList()) {
 				whereProperties[index++] = bf.get(idPair.getProperty()).get("id");
 			}
-			Predicate[] predicates = new Predicate[whereList.size()];
+			Predicate[] predicates = new Predicate[olapQuery.getWhereList().size()];
 			for ( int i = 0; i < whereProperties.length; ++i) {
-				predicates[i] = cb.equal(whereProperties[i], whereList.get(i).getId());
+				predicates[i] = cb.equal(whereProperties[i], olapQuery.getWhereList().get(i).getId());
 			}
 			q.where(cb.or(predicates));
 		}
@@ -253,4 +250,4 @@ public class AnalysisService {
 		});
 		return olapResult;
 	}
-};
+}
