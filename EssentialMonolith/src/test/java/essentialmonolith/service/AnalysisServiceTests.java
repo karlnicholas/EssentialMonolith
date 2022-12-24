@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import essentialmonolith.dto.OlapResult;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,18 +30,18 @@ import essentialmonolith.model.AnalysisRun;
 import essentialmonolith.model.BillingFact;
 import essentialmonolith.model.BillingFactId;
 import essentialmonolith.model.Employee;
-import essentialmonolith.model.HoursRangeDimension;
+import essentialmonolith.model.HoursRange;
 import essentialmonolith.model.Project;
-import essentialmonolith.model.RateRangeDimension;
-import essentialmonolith.model.WeekDimension;
+import essentialmonolith.model.RateRange;
+import essentialmonolith.model.Week;
 import essentialmonolith.model.WorkLog;
 import essentialmonolith.repository.AnalysisRunRepository;
 import essentialmonolith.repository.BillingFactRepository;
 import essentialmonolith.repository.EmployeeRepository;
-import essentialmonolith.repository.HoursRangeDimensionRepository;
+import essentialmonolith.repository.HoursRangeRepository;
 import essentialmonolith.repository.ProjectRepository;
-import essentialmonolith.repository.RateRangeDimensionRepository;
-import essentialmonolith.repository.WeekDimensionRepository;
+import essentialmonolith.repository.RateRangeRepository;
+import essentialmonolith.repository.WeekRepository;
 import essentialmonolith.repository.WorkLogRepository;
 
 @SpringBootTest
@@ -55,9 +54,9 @@ public class AnalysisServiceTests {
 	@Mock private BillingFactRepository billingFactRepository;
 	@Mock private ProjectRepository projectRepository;
 	@Mock private EmployeeRepository employeeRepository;
-	@Mock private WeekDimensionRepository weekDimensionRepository;
-	@Mock private HoursRangeDimensionRepository hoursRangeDimensionRepository;
-	@Mock private RateRangeDimensionRepository rateRangeDimensionRepository;
+	@Mock private WeekRepository weekRepository;
+	@Mock private HoursRangeRepository hoursRangeRepository;
+	@Mock private RateRangeRepository rateRangeRepository;
 	
 	private AnalysisRun analysisRun;
 
@@ -67,18 +66,18 @@ public class AnalysisServiceTests {
 	public void before() {
 		Project project = Project.builder().id(0L).name("P").build();
 		Employee employee = Employee.builder().id(0L).name("E").build();
-		WeekDimension weekDimension = WeekDimension.builder().id(0L).name("0").build();
-		HoursRangeDimension hoursRangeDimension = HoursRangeDimension.builder().id(0L).name("40+").build();
-		RateRangeDimension rateRangeDimension = RateRangeDimension.builder().id(0L).name("80+").build(); 
-		BillingFactId billingFactId = BillingFactId.builder().projectId(0L).employeeId(0L).weekDimensionId(0L).hoursRangeDimensionId(0L).rateRangeDimensionId(0L).build();
+		Week week = Week.builder().id(0L).name("0").build();
+		HoursRange hoursRange = HoursRange.builder().id(0L).name("40+").build();
+		RateRange rateRange = RateRange.builder().id(0L).name("80+").build();
+		BillingFactId billingFactId = BillingFactId.builder().projectId(0L).employeeId(0L).weekId(0L).hoursRangeId(0L).rateRangeId(0L).build();
 		BillingFact billingFact = BillingFact.builder()
 				.billingFactId(billingFactId)
 				.amount(new BigDecimal("3200.00"))
 				.project(project)
 				.employee(employee)
-				.weekDimension(weekDimension)
-				.hoursRangeDimension(hoursRangeDimension)
-				.rateRangeDimension(rateRangeDimension)
+				.week(week)
+				.hoursRange(hoursRange)
+				.rateRange(rateRange)
 				.build();
 		WorkLog workLog = WorkLog.builder()
 				.id(0L)
@@ -102,9 +101,9 @@ public class AnalysisServiceTests {
 		doReturn(Optional.of(analysisRun)).when(analysisRunRepository).findById(Mockito.anyLong());
 		doReturn(analysisRun).when(analysisRunRepository).save(Mockito.any());
 		
-		doReturn(weekDimension).when(weekDimensionRepository).save(Mockito.any());
-		doReturn(hoursRangeDimension).when(hoursRangeDimensionRepository).save(Mockito.any());
-		doReturn(rateRangeDimension).when(rateRangeDimensionRepository).save(Mockito.any());
+		doReturn(week).when(weekRepository).save(Mockito.any());
+		doReturn(hoursRange).when(hoursRangeRepository).save(Mockito.any());
+		doReturn(rateRange).when(rateRangeRepository).save(Mockito.any());
 		
 		doReturn(1L).when(billingFactRepository).count();
 		doReturn(Collections.singletonList(billingFact))
@@ -143,8 +142,8 @@ public class AnalysisServiceTests {
 
 	@Test
 	public void startPopulate() {
-		boolean started = analysisService.startPopulate();
-		assertTrue(started);
+		analysisService.populate();
+		assertTrue(true);
 	}
 
 	@Test

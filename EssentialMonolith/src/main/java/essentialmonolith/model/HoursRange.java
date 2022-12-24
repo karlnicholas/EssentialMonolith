@@ -8,6 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-public class HoursRangeDimension extends Dimension {
+public class HoursRange extends Dimension {
 
 }

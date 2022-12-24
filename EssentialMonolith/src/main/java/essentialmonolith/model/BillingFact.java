@@ -1,7 +1,6 @@
 package essentialmonolith.model;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import javax.persistence.*;
 
@@ -12,7 +11,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class BillingFact {
 	@EmbeddedId private BillingFactId billingFactId;
 	private BigDecimal amount;
@@ -23,26 +21,26 @@ public class BillingFact {
 	@MapsId("employeeId")
 	private Employee employee;
 	@ManyToOne
-	@MapsId("weekDimensionId")
-	private WeekDimension weekDimension;
+	@MapsId("weekId")
+	private Week week;
 	@ManyToOne
-	@MapsId("hoursRangeDimensionId")
-	private HoursRangeDimension hoursRangeDimension;
+	@MapsId("hoursRangeId")
+	private HoursRange hoursRange;
 	@ManyToOne
-	@MapsId("rateRangeDimensionId")
-	private RateRangeDimension rateRangeDimension;
+	@MapsId("rateRangeId")
+	private RateRange rateRange;
 
 	public void setDimension(Dimension d) {
 		if (d instanceof Project) {
 			project = (Project) d;
 		} else if (d instanceof Employee) {
 			employee = (Employee) d;
-		} else if (d instanceof WeekDimension) {
-			weekDimension = (WeekDimension) d;
-		} else if (d instanceof HoursRangeDimension) {
-			hoursRangeDimension = (HoursRangeDimension) d;
-		} else if (d instanceof RateRangeDimension) {
-			rateRangeDimension = (RateRangeDimension) d;
+		} else if (d instanceof Week) {
+			week = (Week) d;
+		} else if (d instanceof HoursRange) {
+			hoursRange = (HoursRange) d;
+		} else if (d instanceof RateRange) {
+			rateRange = (RateRange) d;
 		}
 	}
 }

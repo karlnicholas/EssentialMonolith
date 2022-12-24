@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import essentialmonolith.model.Week;
 
-public interface WeekDimensionRepository extends JpaRepository<Week, Long>{
+public interface WeekRepository extends JpaRepository<Week, Long>{
 
 }

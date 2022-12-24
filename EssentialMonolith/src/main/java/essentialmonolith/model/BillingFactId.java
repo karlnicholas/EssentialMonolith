@@ -15,7 +15,7 @@ public class BillingFactId implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long projectId;
 	private Long employeeId;
-	private Long weekDimensionId;
-	private Long hoursRangeDimensionId;
-	private Long rateRangeDimensionId;
+	private Long weekId;
+	private Long hoursRangeId;
+	private Long rateRangeId;
 }

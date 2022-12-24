@@ -8,6 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-public class RateRangeDimension extends Dimension {
+public class RateRange extends Dimension {
 
 }

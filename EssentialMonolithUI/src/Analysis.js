@@ -136,13 +136,14 @@ function AnalysisPage() {
               <tr><th>Amount</th><th>Project</th><th>Employee</th><th>Week</th><th>Hours Range</th><th>Rate Range</th></tr>
             </thead>
             <tbody>
-              {olapResult.facts.map((fact, index) => <tr key={index}><td>{fact.amount.toLocaleString()}</td><td>{fact.project.name.toLocaleString()}</td><td>{fact.employee.name.toLocaleString()}</td><td>{fact.weekDimension.name.toLocaleString()}</td><td>{fact.hoursRangeDimension.name.toLocaleString()}</td><td>{fact.rateRangeDimension.name.toLocaleString()}</td></tr>)}
+              {olapResult.facts.map((fact, index) => <tr key={index}><td>{fact.amount.toLocaleString()}</td><td>{fact.project.name.toLocaleString()}</td><td>{fact.employee.name.toLocaleString()}</td><td>{fact.week.name.toLocaleString()}</td><td>{fact.hoursRange.name.toLocaleString()}</td><td>{fact.rateRange.name.toLocaleString()}</td></tr>)}
             </tbody>
           </table>
         </div>
       );
     }
   }  
+  const lowercaseFirst = (str) => `${str.charAt(0).toLowerCase()}${str.slice(1)}`;
   const onWhereSelect = (dname, name, id) => {
     let ws = whereSelects.slice(); //creates the clone of the state
     const fi = ws.findIndex(e => (e.property === dname && e.id === id));
@@ -155,7 +156,7 @@ function AnalysisPage() {
     var whereList = [];
     var i;
     for (i = 0; i < ws.length; ++i) {
-      whereList.push({'property': ws[i].property.toLowerCase(), 'id': ws[i].id});
+      whereList.push({'property': lowercaseFirst(ws[i].property), 'id': ws[i].id});
     }
     (async()=>{
       http.post('/analysis/olap', whereList).then(response => {

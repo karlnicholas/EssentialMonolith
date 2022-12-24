@@ -63,7 +63,7 @@ public class AnalysisControllerTests {
 	}
 	@Test
 	public void getStartPopulate() throws Exception {
-		doReturn(Boolean.TRUE).when(analysisService).startPopulate();
+		doReturn(Boolean.TRUE).when(analysisService).populate();
 
 		mockMvc.perform(get("/api/analysis/populate")).andDo(print())
 		.andExpect(status().isOk());

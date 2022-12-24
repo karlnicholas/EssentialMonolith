@@ -8,6 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-public class WeekDimension extends Dimension {
+public class Week extends Dimension {
 
 }
