@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 import essentialmonolith.dto.OlapResult;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -63,7 +64,12 @@ public class AnalysisControllerTests {
 	}
 	@Test
 	public void getStartPopulate() throws Exception {
-		doReturn(Boolean.TRUE).when(analysisService).populate();
+		doReturn(CompletableFuture.completedFuture(null)).when(analysisService).populate();
+
+		AnalysisRun analysisRun = new AnalysisRun();
+		analysisRun.setLastRunTime(LocalDateTime.now());
+		analysisRun.setPopulating(Boolean.TRUE);
+		doReturn(analysisRun).when(analysisService).getAnalysisRunState();
 
 		mockMvc.perform(get("/api/analysis/populate")).andDo(print())
 		.andExpect(status().isOk());
